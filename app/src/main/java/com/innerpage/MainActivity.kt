@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -47,7 +48,8 @@ class MainActivity : FragmentActivity() {
 }
 
 @Composable fun App() {
-    val dao = remember { Db.get(LocalContext.current).dao() }
+    val ctx = LocalContext.current
+    val dao = remember { Db.get(ctx).dao() }
     val entries by dao.all().collectAsState(emptyList())
     val scope = rememberCoroutineScope()
     var tab by remember { mutableStateOf("home") }
@@ -128,7 +130,7 @@ class MainActivity : FragmentActivity() {
                     }
                 }
                 Box(Modifier.width(56.dp).fillMaxHeight().clip(RoundedCornerShape(16.dp)).background(Color(0xFFCFC4B4)).clickable { start("Evening Reflection") }, Alignment.Center) {
-                    Text("Evening", fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.rotateVertical())
+                    Text("Evening", fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.wrapContentWidth(unbounded = true).rotate(-90f))
                 }
             }
         }
@@ -141,10 +143,6 @@ class MainActivity : FragmentActivity() {
         if (entries.isNotEmpty()) { item { Text("Recent", fontWeight = FontWeight.Medium) }; items(entries.take(3)) { EntryRow(it) { open(it) } } }
     }
 }
-fun Modifier.rotateVertical() = this.then(Modifier.layout { m, c ->
-    val p = m.measure(c.copy(minWidth = 0, minHeight = 0, maxWidth = Int.MAX_VALUE, maxHeight = Int.MAX_VALUE))
-    layout(p.height, p.width) { p.placeWithLayer(-(p.width - p.height) / 2, (p.width - p.height) / 2) { rotationZ = -90f } }
-})
 @Composable fun PromptCard(t: String, b: String, c: Color, m: Modifier, click: () -> Unit) =
     Column(m.clip(RoundedCornerShape(16.dp)).background(c).clickable { click() }.padding(14.dp).heightIn(min = 100.dp)) {
         Text(t, fontWeight = FontWeight.Medium, fontSize = 13.sp); Spacer(Modifier.height(4.dp)); Text(b, fontSize = 11.sp)
